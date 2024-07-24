@@ -1,0 +1,130 @@
+{
+    "definition": {
+        "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+        "actions": {
+            "Add_user_to_group": {
+                "inputs": {
+                    "body": {
+                        "@@odata.id": "@body('Create_user')?['id']"
+                    },
+                    "host": {
+                        "connection": {
+                            "name": "@parameters('$connections')['azuread']['connectionId']"
+                        }
+                    },
+                    "method": "post",
+                    "path": "/v1.0/groups/@{encodeURIComponent('(your group ID here)')}/members/$ref"
+                },
+                "runAfter": {
+                    "Create_user": [
+                        "Succeeded"
+                    ]
+                },
+                "type": "ApiConnection"
+            },
+            "Create_user": {
+                "inputs": {
+                    "body": {
+                        "accountEnabled": true,
+                        "department": "@triggerBody()?['Department']",
+                        "displayName": "@{triggerBody()?['FirstName']}@{triggerBody()?['LastName']}",
+                        "givenName": "@triggerBody()?['FirstName']",
+                        "mailNickname": "@{triggerBody()?['FirstName']}@{triggerBody()?['LastName']}",
+                        "passwordProfile": {
+                            "password": "Temp@1138"  // Consider replacing with a secure placeholder
+                        },
+                        "surname": "@triggerBody()?['LastName']",
+                        "userPrincipalName": "@{triggerBody()?['FirstName']}.@{triggerBody()?['LastName']}@(your domain here)"
+                    },
+                    "host": {
+                        "connection": {
+                            "name": "@parameters('$connections')['azuread']['connectionId']"
+                        }
+                    },
+                    "method": "post",
+                    "path": "/v1.0/users"
+                },
+                "runAfter": {},
+                "type": "ApiConnection"
+            },
+            "Send_an_email_(V2)": {
+                "inputs": {
+                    "body": {
+                        "Body": "<p><span>A new user was created.\n\nFirst Name: </span>@{triggerBody()?['FirstName']}<span>\nLast Name: </span>@{triggerBody()?['LastName']}<span>\nEmail: </span>@{body('Create_user')?['mail']}<span>\n</span></p>",
+                        "Subject": "New User Creation",
+                        "To": "(your email here)"
+                    },
+                    "host": {
+                        "connection": {
+                            "name": "@parameters('$connections')['office365']['connectionId']"
+                        }
+                    },
+                    "method": "post",
+                    "path": "/v2/Mail"
+                },
+                "runAfter": {
+                    "Add_user_to_group": [
+                        "Succeeded"
+                    ]
+                },
+                "type": "ApiConnection"
+            }
+        },
+        "contentVersion": "1.0.0.0",
+        "outputs": {},
+        "parameters": {
+            "$connections": {
+                "defaultValue": {},
+                "type": "Object"
+            }
+        },
+        "triggers": {
+            "When_an_item_is_created_or_modified": {
+                "evaluatedRecurrence": {
+                    "frequency": "Minute",
+                    "interval": 3,
+                    "startTime": "2024-07-23T15:00:00Z",
+                    "timeZone": "Mountain Standard Time"
+                },
+                "inputs": {
+                    "host": {
+                        "connection": {
+                            "name": "@parameters('$connections')['sharepointonline']['connectionId']"
+                        }
+                    },
+                    "method": "get",
+                    "path": "/datasets/@{encodeURIComponent(encodeURIComponent('(your sharepoint site here)'))}/tables/@{encodeURIComponent(encodeURIComponent('(your table ID here)'))}/onupdateditems"
+                },
+                "recurrence": {
+                    "frequency": "Minute",
+                    "interval": 3,
+                    "startTime": "2024-07-23T15:00:00Z",
+                    "timeZone": "Mountain Standard Time"
+                },
+                "splitOn": "@triggerBody()?['value']",
+                "type": "ApiConnection"
+            }
+        }
+    },
+    "parameters": {
+        "$connections": {
+            "value": {
+                "azuread": {
+                    "connectionId": "(your azuread connectionId here)",
+                    "connectionName": "azuread",
+                    "id": "(your azuread id here)"
+                },
+                "office365": {
+                    "connectionId": "(your office365 connectionId here)",
+                    "connectionName": "office365",
+                    "id": "(your office365 id here)"
+                },
+                "sharepointonline": {
+                    "connectionId": "(your sharepointonline connectionId here)",
+                    "connectionName": "sharepointonline-1",
+                    "id": "(your sharepointonline id here)"
+                }
+            }
+        }
+    }
+}
