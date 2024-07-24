@@ -1,0 +1,15 @@
+This walkthrough assumes that you (or your client) already have an Azure account.
+In this instance HR has a teams list that they will update with the new employees First and last names, the department and the start date.
+*Pro Tip: Make sure you have this in the correct folder. When I first did this, it was in someone’s personal folder and not a team/group folder. If you can’t find the list later this could be why.
+In Azure, create a new logic app.  Make sure to name it and place it in the correct resource groups. 
+For the plan type Consumption was picked because the app will not be running frequently and will keep costs down. Your app or environment may differ, please choose accordingly.
+Also, in this instance we used the default tags.
+For simplicity we will use the app designer.
+Your first option is to create a trigger. Search for “When an item is modified” and make sure to select the option with the green SharePoint icon.
+It will ask for your site address (https://<your account>.sharepoint.com). It should pull up by default after signing in. If not check your account and make sure SharePoint is linked.
+If it can access the site correctly, you should see the list name populate with your created list. You can also set how often you want this to check in the drop down menu.
+Next we will add an action: “Create user”  under Entra ID
+Since we have the columns set in the list, we will use those columns to fill in the users information (click the field then click on the lightning bolt that appears.)
+For principal name, after adding the first and last name, you can add a “.” between the two names if that is part of your formatting. Also don’t forget to add your domain name here as well. (Also double check your typing had an app fail a few times because it was .uas not .us.)
+
+
