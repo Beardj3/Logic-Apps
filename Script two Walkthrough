@@ -1,0 +1,33 @@
+For this script I am going to skip over the trigger and crate user since those are the same as script 1
+Here we are adding the option for multiple groups to show a more realistic scenario. Will also be adding a lcenses as well later
+After the create user step we need to initialize variables. This can be a bit tedious. In this example we have the following departments:
+Sales/Marketing, Human Resources, Customer Service, Production, Finance, Executive, and IT. Each of these has a corisponding group in Azure.
+First initialize a variable and put 'target_group_id' in the first field, set it to string and leave the last field blank.
+For each Department you then need to initialize a variable, Label it with the department name, set it to string, then copy the group ID from Azure to the last field.
+Sales and Marketing are the same group but crated a variable for each pointing to the same group. (So in my case it was 8 groups)
+Now you should have your first blank variable and one variable for each department. (In my case 9 total)
+Now the next fun, yet tedious task, add a task and create a switch. The switch control ON field add: @triggerBody()?['Department']
+Now we need to add a case for each department. Click on the plus in the empty area to add a case. Put the name of the department (e.g. sales) in the field
+Below the case add an action and search for condition. When you see the True, click on the plus underneath and add the add user to group action under Entra.
+Using the lightning bolt add Id to the user field and the group/department name to the group ID field. Repeat as often as necessary
+Please save as you go, so one you don't loose anything and 2 it will fail if there are obvious errors. These are things you can correct after each edition insterad of spending 20 mins on one step only to have to redo it
+Now we add the user to a group. In this field use the lightning bolt and find Id for the user field.
+For the group field I used the following code: '/v1.0/groups/@{variables('target_group_id')}/members/$ref' 
+Now we add the license. This action is found by searching HTTP.
+We are going to be using graph for this action.
+In the URI, I used this: https://graph.microsoft.com/v1.0/users//assignLicense
+Method is POST. (If you don’t recall, post is a command in HTTP that lets you create/modify data and is Idempotent)
+For your headers on table one I used:
+Content-Type    |    application/json
+Authorization    |   Bearer parameters('$connections')['azuread']['connectionId']
+For the Body I used the following:
+{
+"addLicenses": [
+{
+"skuId": "O365_BUSINESS_STANDARD"
+}
+],
+"removeLicenses": []
+}
+*Note make sure you have the correct license SKU, if you don’t the user will still be created, but they will be unlicensed.
+Lastly we add the action to send the email when completed.
