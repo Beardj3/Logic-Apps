@@ -11,5 +11,9 @@ If it can access the site correctly, you should see the list name populate with 
 Next we will add an action: “Create user”  under Entra ID
 Since we have the columns set in the list, we will use those columns to fill in the users information (click the field then click on the lightning bolt that appears.)
 For principal name, after adding the first and last name, you can add a “.” between the two names if that is part of your formatting. Also don’t forget to add your domain name here as well. (Also double check your typing had an app fail a few times because it was .uas not .us.)
-
-
+The first box you can type Id, or let the dropdown box fill it in for you. (Anything else could cause it to fail since it needs to be the ID of the user who you haven’t created yet.)
+The group ID you need to get from your Entra ID. (Entra -> Manage -> Groups then copy the Object ID) Once this is copied over you can move on to the last part.
+Adding the next step, “send an email (V2)” again, make sure it is Office 365 Outlook (unless you are using an email not in your tenant)
+Add the email you want this to generate to and the subject line you want. (in my case it was New User Creation: <Display Name>)
+For the body I made sure to add the created first name, last name and email address to the text 
+Test it out and see how it goes!
